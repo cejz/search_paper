@@ -4,6 +4,7 @@ import openai
 import os 
 import xml.etree.ElementTree as ET
 from tqdm import tqdm
+import re
 
 API_KEY = "sk-"
 
@@ -46,7 +47,13 @@ def filter_paper(papers: list[dict[str,str]], topic: str):
                 {"role": "user", "content": f"Topic: {topic} \n Abstract: {paper['abstract']}"},
             ]       
         ).choices[0].message.content
-        paper["score"] = int(response)
+        
+        score = re.search(r"\d+", response)
+        try:
+            paper["score"] = int(score.group())
+        except:
+            print("Error: ", response, "title: ", paper["title"])
+            continue
     return papers
 
 def download(filename: str, destination: str, bar: int = 50):
